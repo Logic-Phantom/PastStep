@@ -1,0 +1,50 @@
+{
+  "name": "paststep-3d",
+  "version": "1.0.0",
+  "description": "Time-Travel Photo → Walkable 3D - Transform photos into walkable 3D scenes",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint . --ext js,jsx,ts,tsx",
+    "lint:fix": "eslint . --ext js,jsx,ts,tsx --fix"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "three": "^0.158.0",
+    "@react-three/fiber": "^8.15.11",
+    "@react-three/drei": "^9.88.13",
+    "@react-three/postprocessing": "^2.15.11",
+    "zustand": "^4.4.7",
+    "axios": "^1.6.2",
+    "react-dropzone": "^14.2.3",
+    "react-hot-toast": "^2.4.1",
+    "framer-motion": "^10.16.5"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.37",
+    "@types/react-dom": "^18.2.15",
+    "@types/three": "^0.158.3",
+    "@vitejs/plugin-react": "^4.1.1",
+    "vite": "^5.0.0",
+    "vite-plugin-pwa": "^0.17.4",
+    "eslint": "^8.53.0",
+    "eslint-plugin-react": "^7.33.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.4",
+    "typescript": "^5.2.2"
+  },
+  "keywords": [
+    "3d",
+    "photography",
+    "depth-estimation",
+    "threejs",
+    "webgpu",
+    "pwa",
+    "time-travel"
+  ],
+  "author": "PastStep Team",
+  "license": "MIT"
+}
