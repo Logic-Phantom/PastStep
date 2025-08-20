@@ -1,17 +1,19 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, FirstPersonControls, Environment, Stats } from '@react-three/drei';
 import * as THREE from 'three';
 import { motion } from 'framer-motion';
 import { useAppStore } from '@/store/appStore';
-import { createLayerMesh, setupLighting, createTextureFromImage } from '@/utils/threeUtils';
+import { createLayerMesh, createTextureFromImage } from '@/utils/threeUtils';
 import { Scene3D as Scene3DType } from '@/types';
+import ParticleSystem from './ParticleSystem';
 
 interface SceneContentProps {
   scene: Scene3DType;
+  controlMode: 'orbit' | 'first-person' | 'auto';
 }
 
-const SceneContent: React.FC<SceneContentProps> = ({ scene }) => {
+const SceneContent: React.FC<SceneContentProps> = ({ scene, controlMode }) => {
   const { camera } = useThree();
   const [meshes, setMeshes] = useState<THREE.Mesh[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -40,13 +42,21 @@ const SceneContent: React.FC<SceneContentProps> = ({ scene }) => {
     loadScene();
   }, [scene]);
 
-  // 카메라 자동 패닝 애니메이션
+  // 자동 패닝 모드에서만 카메라 자동 움직임
   useFrame((state) => {
-    if (!isLoading) {
+    if (!isLoading && controlMode === 'auto') {
       const time = state.clock.getElapsedTime();
-      camera.position.x = Math.sin(time * 0.5) * 3;
-      camera.position.z = Math.cos(time * 0.5) * 3 + 5;
-      camera.lookAt(0, 0, 0);
+      
+      // 부드러운 원형 궤도 + 수직 움직임
+      const radius = 4 + Math.sin(time * 0.3) * 1;
+      camera.position.x = Math.sin(time * 0.4) * radius;
+      camera.position.y = Math.sin(time * 0.2) * 1.5;
+      camera.position.z = Math.cos(time * 0.4) * radius + 6;
+      
+      // 부드러운 시선 추적 (약간의 오프셋)
+      const lookAtX = Math.sin(time * 0.1) * 0.5;
+      const lookAtY = Math.cos(time * 0.15) * 0.3;
+      camera.lookAt(lookAtX, lookAtY, 0);
     }
   });
 
@@ -66,19 +76,46 @@ const SceneContent: React.FC<SceneContentProps> = ({ scene }) => {
         <primitive key={index} object={mesh} />
       ))}
       
-      {/* 조명 */}
-      <ambientLight intensity={0.6} />
-      <directionalLight 
-        position={[10, 10, 5]} 
-        intensity={0.8} 
-        castShadow 
-        shadow-mapSize-width={2048}
-        shadow-mapSize-height={2048}
-      />
-      <pointLight position={[-10, 10, 10]} intensity={0.5} />
+      {/* 향상된 조명 시스템 */}
+      <ambientLight intensity={0.4} color={0x404040} />
       
-      {/* 환경 */}
-      <Environment preset="sunset" />
+      {/* 메인 방향광 */}
+      <directionalLight 
+        position={[12, 8, 6]} 
+        intensity={1.2} 
+        color={0xffffff}
+        castShadow 
+        shadow-mapSize-width={4096}
+        shadow-mapSize-height={4096}
+        shadow-camera-near={0.1}
+        shadow-camera-far={50}
+        shadow-camera-left={-20}
+        shadow-camera-right={20}
+        shadow-camera-top={20}
+        shadow-camera-bottom={-20}
+        shadow-bias={-0.0001}
+      />
+      
+      {/* 보조 조명들 */}
+      <pointLight position={[-8, 6, 8]} intensity={0.6} color={0xffeedd} />
+      <pointLight position={[5, -4, 10]} intensity={0.4} color={0xddddff} />
+      <spotLight 
+        position={[0, 10, 0]} 
+        angle={Math.PI / 6}
+        penumbra={0.3}
+        intensity={0.8}
+        color={0xffffff}
+        castShadow
+      />
+      
+      {/* 향상된 환경 효과 */}
+      <Environment preset="city" background={false} />
+      
+      {/* 대기 효과 */}
+      <fog attach="fog" args={['#202040', 10, 50]} />
+      
+      {/* 파티클 시스템 (먼지 효과) */}
+      <ParticleSystem />
     </>
   );
 };
@@ -112,7 +149,7 @@ const Scene3D: React.FC = () => {
           powerPreference: "high-performance"
         }}
       >
-        <SceneContent scene={currentScene} />
+        <SceneContent scene={currentScene} controlMode={controlMode} />
         
         {/* 컨트롤 */}
         {controlMode === 'orbit' && (
@@ -132,8 +169,8 @@ const Scene3D: React.FC = () => {
           />
         )}
         
-        {/* 성능 모니터링 (개발 모드에서만) */}
-        {import.meta.env.DEV && <Stats />}
+        {/* 성능 모니터링 */}
+        <Stats />
       </Canvas>
 
       {/* 컨트롤 패널 */}
@@ -143,27 +180,33 @@ const Scene3D: React.FC = () => {
         className="absolute top-4 left-4 glass p-4 rounded-lg"
       >
         <h3 className="text-sm font-semibold mb-2">카메라 모드</h3>
-        <div className="space-y-2">
+        <div className="flex flex-col space-y-2">
           <button
             onClick={() => setControlMode('auto')}
-            className={`btn btn-secondary text-xs px-3 py-1 ${
-              controlMode === 'auto' ? 'bg-purple-500' : ''
+            className={`w-full px-3 py-2 text-xs font-medium rounded-lg border transition-all duration-200 ${
+              controlMode === 'auto' 
+                ? 'bg-purple-600 border-purple-500 text-white shadow-lg shadow-purple-500/25' 
+                : 'bg-white/10 border-white/20 text-white/80 hover:bg-white/20 hover:border-white/30'
             }`}
           >
             자동 패닝
           </button>
           <button
             onClick={() => setControlMode('orbit')}
-            className={`btn btn-secondary text-xs px-3 py-1 ${
-              controlMode === 'orbit' ? 'bg-purple-500' : ''
+            className={`w-full px-3 py-2 text-xs font-medium rounded-lg border transition-all duration-200 ${
+              controlMode === 'orbit' 
+                ? 'bg-purple-600 border-purple-500 text-white shadow-lg shadow-purple-500/25' 
+                : 'bg-white/10 border-white/20 text-white/80 hover:bg-white/20 hover:border-white/30'
             }`}
           >
             마우스 조작
           </button>
           <button
             onClick={() => setControlMode('first-person')}
-            className={`btn btn-secondary text-xs px-3 py-1 ${
-              controlMode === 'first-person' ? 'bg-purple-500' : ''
+            className={`w-full px-3 py-2 text-xs font-medium rounded-lg border transition-all duration-200 ${
+              controlMode === 'first-person' 
+                ? 'bg-purple-600 border-purple-500 text-white shadow-lg shadow-purple-500/25' 
+                : 'bg-white/10 border-white/20 text-white/80 hover:bg-white/20 hover:border-white/30'
             }`}
           >
             1인칭 시점

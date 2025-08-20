@@ -29,7 +29,7 @@ const initialState: AppState = {
 
 export const useAppStore = create<AppStore>()(
   devtools(
-    (set, get) => ({
+    (set) => ({
       ...initialState,
 
       setProcessing: (processing) => {
@@ -44,6 +44,15 @@ export const useAppStore = create<AppStore>()(
               ...state.ui,
               showUpload: false,
               showControls: true
+            }
+          }));
+        } else {
+          // 씬이 null일 때 초기 상태로 복원
+          set((state) => ({
+            ui: {
+              ...state.ui,
+              showUpload: true,
+              showControls: false
             }
           }));
         }
@@ -71,7 +80,14 @@ export const useAppStore = create<AppStore>()(
       },
 
       reset: () => {
-        set(initialState);
+        set({
+          ...initialState,
+          processing: {
+            status: 'idle',
+            progress: 0,
+            message: 'Ready to transform your photos'
+          }
+        });
       }
     }),
     {

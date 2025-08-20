@@ -8,7 +8,7 @@ export interface DepthMap {
 
 export interface Layer {
   id: string;
-  name: 'foreground' | 'midground' | 'background';
+  name: string;
   mask: boolean[][];
   depthRange: [number, number];
   mesh?: THREE.Mesh;
