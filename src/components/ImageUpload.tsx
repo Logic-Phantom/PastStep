@@ -113,10 +113,10 @@ const ImageUpload: React.FC = () => {
               'relative z-10 border-2 border-dashed rounded-2xl p-12 text-center cursor-pointer transition-all duration-300 overflow-hidden min-h-[360px] flex items-center justify-center',
               isDragActive ? 'border-purple-400 bg-purple-400/10 scale-[1.01]' : 'border-white/10 hover:border-purple-400 hover:bg-black/20'
             )}>
-              <input {...getInputProps()} />
-
+        <input {...getInputProps()} />
+        
               <AnimatePresence mode="wait">
-                {isDragActive ? (
+          {isDragActive ? (
                   <motion.div key="drag-active" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="space-y-4">
                     <motion.div animate={{ y: [-5, 5, -5] }} transition={{ duration: 2, repeat: Infinity }} className="text-6xl mb-4">📸</motion.div>
                     <p className="text-purple-400 font-semibold text-lg">여기에 이미지를 놓으세요</p>
@@ -140,15 +140,15 @@ const ImageUpload: React.FC = () => {
             </div>
           </div>
         </div>
-      </div>
+        </div>
 
       <div className="flex-shrink-0 px-8 pb-8">
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8, duration: 0.5 }} className="text-center">
           <div className="inline-flex items-center space-x-2 text-sm text-gray-500 bg-gray-800/50 px-4 py-2 rounded-full">
             <Sparkles className="w-4 h-4" />
             <span>권장: 인물이나 거리 사진이 가장 좋은 결과를 보여줍니다</span>
-          </div>
-        </motion.div>
+      </div>
+    </motion.div>
       </div>
     </div>
   );
